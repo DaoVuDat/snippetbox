@@ -15,6 +15,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 	}
 	files := []string{
 		"./ui/html/base.tmpl.gohtml", // this must be the 1st file in the slice
+		"./ui/html/partials/nav.tmpl.gohtml",
 		"./ui/html/pages/home.tmpl.gohtml",
 	}
 	ts, err := template.ParseFiles(files...)
