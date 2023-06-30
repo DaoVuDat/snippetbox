@@ -1,0 +1,2 @@
+### Send GET request to /snippet/view with id=123
+GET http://localhost:4000/snippet/view?id=123
