@@ -2,8 +2,10 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
+	"text/template"
 )
 
 func home(w http.ResponseWriter, r *http.Request) {
@@ -11,7 +13,28 @@ func home(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	w.Write([]byte("Hello from Snippetbox"))
+	// Use the template.ParseFiles() function to read the template file into a
+	// template set. If there's an error, we log the detailed error message and use
+	// the http.Error() function to send a generic 500 Internal Server Error
+	// response to the user.
+	// File name is relative to current working directory ( the one running cmd )
+	ts, err := template.ParseFiles("./ui/html/pages/home.tmpl.html")
+
+	if err != nil {
+		log.Print(err.Error())
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	// We then use the Execute() method on the template set to write the
+	// template content as the response body. The last parameter to Execute()
+	// represents any dynamic data that we want to pass in, which for now we'll
+	// leave as nil.
+	err = ts.Execute(w, nil)
+	if err != nil {
+		log.Print(err.Error())
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+	}
 }
 
 func snippetView(w http.ResponseWriter, r *http.Request) {
