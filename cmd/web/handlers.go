@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/DaoVuDat/snippetbox/internal/models"
+	"html/template"
 	"net/http"
 	"strconv"
 )
@@ -21,28 +22,28 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	for _, snippet := range snippets {
-		fmt.Fprintf(w, "%+v\n", snippet)
+	files := []string{
+		"./ui/html/base.tmpl.gohtml", // this must be the 1st file in the slice
+		"./ui/html/partials/nav.tmpl.gohtml",
+		"./ui/html/pages/home.tmpl.gohtml",
+	}
+	ts, err := template.ParseFiles(files...)
+
+	if err != nil {
+		app.serverError(w, err) // Use the serverError() helper.
+		return
 	}
 
-	//files := []string{
-	//	"./ui/html/base.tmpl.gohtml", // this must be the 1st file in the slice
-	//	"./ui/html/partials/nav.tmpl.gohtml",
-	//	"./ui/html/pages/home.tmpl.gohtml",
-	//}
-	//ts, err := template.ParseFiles(files...)
-	//
-	//if err != nil {
-	//	app.serverError(w, err) // Use the serverError() helper.
-	//	return
-	//}
-	//
-	//// Use the ExecuteTemplate() method to write the content of the "base"
-	//// template as the response body.
-	//err = ts.ExecuteTemplate(w, "base", nil)
-	//if err != nil {
-	//	app.serverError(w, err) // Use the serverError() helper.
-	//}
+	data := &templateData{
+		Snippets: snippets,
+	}
+
+	// Use the ExecuteTemplate() method to write the content of the "base"
+	// template as the response body.
+	err = ts.ExecuteTemplate(w, "base", data)
+	if err != nil {
+		app.serverError(w, err) // Use the serverError() helper.
+	}
 }
 
 func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
@@ -52,9 +53,6 @@ func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Use the SnippetModel object's Get method to retrieve the data for a
-	// specific record based on its ID. If no matching record is found,
-	// return a 404 Not Found response.
 	snippet, err := app.snippets.Get(id)
 
 	if err != nil {
@@ -66,8 +64,26 @@ func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Write the snippet data as a plain-text HTTP response body.
-	fmt.Fprintf(w, "%+v", snippet)
+	files := []string{
+		"./ui/html/base.tmpl.gohtml",
+		"./ui/html/partials/nav.tmpl.gohtml",
+		"./ui/html/pages/view.tmpl.gohtml",
+	}
+
+	ts, err := template.ParseFiles(files...)
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	data := &templateData{
+		Snippet: snippet,
+	}
+
+	err = ts.ExecuteTemplate(w, "base", data)
+	if err != nil {
+		app.serverError(w, err)
+	}
 }
 
 func (app *application) snippetCreate(w http.ResponseWriter, r *http.Request) {
