@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/DaoVuDat/snippetbox/internal/models"
-	"html/template"
 	"net/http"
 	"strconv"
 )
@@ -22,28 +21,10 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	files := []string{
-		"./ui/html/base.tmpl.gohtml", // this must be the 1st file in the slice
-		"./ui/html/partials/nav.tmpl.gohtml",
-		"./ui/html/pages/home.tmpl.gohtml",
-	}
-	ts, err := template.ParseFiles(files...)
-
-	if err != nil {
-		app.serverError(w, err) // Use the serverError() helper.
-		return
-	}
-
-	data := &templateData{
+	// Use the new render helper.
+	app.render(w, http.StatusOK, "home.tmpl.gohtml", &templateData{
 		Snippets: snippets,
-	}
-
-	// Use the ExecuteTemplate() method to write the content of the "base"
-	// template as the response body.
-	err = ts.ExecuteTemplate(w, "base", data)
-	if err != nil {
-		app.serverError(w, err) // Use the serverError() helper.
-	}
+	})
 }
 
 func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
@@ -63,27 +44,10 @@ func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-
-	files := []string{
-		"./ui/html/base.tmpl.gohtml",
-		"./ui/html/partials/nav.tmpl.gohtml",
-		"./ui/html/pages/view.tmpl.gohtml",
-	}
-
-	ts, err := template.ParseFiles(files...)
-	if err != nil {
-		app.serverError(w, err)
-		return
-	}
-
-	data := &templateData{
+	// Use the new render helper.
+	app.render(w, http.StatusOK, "view.tmpl.gohtml", &templateData{
 		Snippet: snippet,
-	}
-
-	err = ts.ExecuteTemplate(w, "base", data)
-	if err != nil {
-		app.serverError(w, err)
-	}
+	})
 }
 
 func (app *application) snippetCreate(w http.ResponseWriter, r *http.Request) {
