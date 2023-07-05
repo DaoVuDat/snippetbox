@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"flag"
 	"github.com/DaoVuDat/snippetbox/internal/models"
+	"github.com/go-playground/form/v4"
 	_ "github.com/go-sql-driver/mysql"
 	"html/template"
 	"log"
@@ -16,6 +17,7 @@ type application struct {
 	infoLog       *log.Logger
 	snippets      *models.SnippetModel
 	templateCache map[string]*template.Template
+	formDecoder   *form.Decoder
 }
 
 func main() {
@@ -47,6 +49,8 @@ func main() {
 		errorLog.Fatal(err)
 	}
 
+	formDecoder := form.NewDecoder()
+
 	app := &application{
 		errorLog: errorLog,
 		infoLog:  infoLog,
@@ -54,6 +58,7 @@ func main() {
 			DB: db,
 		},
 		templateCache: templateCache,
+		formDecoder:   formDecoder,
 	}
 
 	// Initialize a new http.Server struct. We set the Addr and Handler fields so
